@@ -10,7 +10,12 @@ import java.util.List;
 public interface FileStorage {
 
     /** Stores the upload under a generated key. */
-    StoredFile upload(MultipartFile file) throws IOException;
+    default StoredFile upload(MultipartFile file) throws IOException {
+        return upload(file, "");
+    }
+
+    /** Stores the upload under a generated key inside a folder/category path. */
+    StoredFile upload(MultipartFile file, String folder) throws IOException;
 
     /** Lists all stored keys in the backend. */
     List<String> list() throws IOException;

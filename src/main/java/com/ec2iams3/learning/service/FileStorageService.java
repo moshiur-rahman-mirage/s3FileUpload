@@ -27,7 +27,7 @@ public class FileStorageService {
         }
 
         try {
-            StoredFile storedFile = fileStorage.upload(file);
+            StoredFile storedFile = fileStorage.upload(file, category.getPath());
             return storedFile.key();
         } catch (IOException e) {
             throw new RuntimeException("Failed to upload file", e);
@@ -67,7 +67,17 @@ public class FileStorageService {
     }
 
     public enum FileCategory {
-        INVOICE,
-        PROFILE_IMAGE
+        INVOICE("invoice"),
+        PROFILE_IMAGE("profileimage");
+
+        private final String path;
+
+        FileCategory(String path) {
+            this.path = path;
+        }
+
+        public String getPath() {
+            return path;
+        }
     }
 }

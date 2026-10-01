@@ -61,8 +61,8 @@ public class S3FileStorage implements FileStorage, AutoCloseable {
     }
 
     @Override
-    public StoredFile upload(MultipartFile file) throws IOException {
-        StoredFile storedFile = StoredFile.fromUpload(file);
+    public StoredFile upload(MultipartFile file, String folder) throws IOException {
+        StoredFile storedFile = StoredFile.fromUpload(file, folder);
         String contentType = storedFile.contentType() == null || storedFile.contentType().isBlank()
                 ? "application/octet-stream"
                 : storedFile.contentType();

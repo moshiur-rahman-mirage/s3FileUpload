@@ -18,16 +18,17 @@ public final class StorageKeys {
     }
 
     /**
-     * Read-side validation. Deliberately permissive about characters so keys
-     * created by older versions (spaces, unicode) still resolve; it only blocks
-     * anything that could escape the storage root or break an object key.
-     */
+    /** Read-side validation. Accepts nested paths, but blocks traversal and malformed segments. */
     public static void validate(String key) {
-        if (key == null || key.isBlank()
-                || key.indexOf('/') >= 0 || key.indexOf('\\') >= 0
-                || key.equals(".") || key.equals("..")
-                || key.chars().anyMatch(Character::isISOControl)) {
+        if (key == null || key.isBlank() || key.indexOf('\\') >= 0 || key.chars().anyMatch(Character::isISOControl)) {
             throw new IllegalArgumentException("Invalid file key");
+        }
+
+        String[] segments = key.split("/", -1);
+        for (String segment : segments) {
+            if (segment.isEmpty() || segment.equals(".") || segment.equals("..")) {
+                throw new IllegalArgumentException("Invalid file key");
+            }
         }
     }
 
@@ -41,6 +42,10 @@ public final class StorageKeys {
 
     /** Write-side: new keys are ASCII-safe, length-bounded and never start with a dot. */
     public static String newKey(String baseName) {
+        return newKey(baseName, null);
+    }
+
+    public static String newKey(String baseName, String folder) {
         String safe = UNSAFE_CHARS.matcher(baseName).replaceAll("_");
         safe = LEADING_DOTS.matcher(safe).replaceFirst("");
         if (safe.isEmpty()) {
@@ -52,6 +57,13 @@ public final class StorageKeys {
                     ? safe.substring(dot) : "";
             safe = safe.substring(0, MAX_NAME_LENGTH - extension.length()) + extension;
         }
-        return UUID.randomUUID() + "_" + safe;
+
+        String key = UUID.randomUUID() + "_" + safe;
+        if (folder == null || folder.isBlank()) {
+            return key;
+        }
+
+        String normalizedFolder = folder.replace('\\', '/').replaceAll("^/+|/+$", "");
+        return normalizedFolder + "/" + key;
     }
 }

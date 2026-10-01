@@ -31,9 +31,13 @@ public class LocalFileStorage implements FileStorage {
     }
 
     @Override
-    public StoredFile upload(MultipartFile file) throws IOException {
-        StoredFile storedFile = StoredFile.fromUpload(file);
+    public StoredFile upload(MultipartFile file, String folder) throws IOException {
+        StoredFile storedFile = StoredFile.fromUpload(file, folder);
         Path destination = resolve(storedFile.key());
+        Path parent = destination.getParent();
+        if (parent != null) {
+            Files.createDirectories(parent);
+        }
         try {
             file.transferTo(destination);
         } catch (IOException | RuntimeException e) {

@@ -5,12 +5,16 @@ import org.springframework.web.multipart.MultipartFile;
 public record StoredFile(String key, String originalFilename, String contentType, long size) {
 
     public static StoredFile fromUpload(MultipartFile file) {
+        return fromUpload(file, null);
+    }
+
+    public static StoredFile fromUpload(MultipartFile file, String folder) {
         if (file == null || file.isEmpty()) {
             throw new IllegalArgumentException("Uploaded file is empty");
         }
         String originalFilename = StorageKeys.baseName(file.getOriginalFilename());
         return new StoredFile(
-                StorageKeys.newKey(originalFilename),
+                StorageKeys.newKey(originalFilename, folder),
                 originalFilename,
                 file.getContentType(),
                 file.getSize());
